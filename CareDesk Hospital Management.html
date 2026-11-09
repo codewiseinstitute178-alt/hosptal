@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CareDesk Hospital Management</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f6f7;--card:#fff;--ink:#14232f;--mut:#5d6f7b;--line:#dbe4e8;--side:#10283a;--acc:#0e8a8c;--acc2:#e8f5f5;--bad:#c93c52;--warn:#b9770e;--ok:#1f8a4c;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1a23;--card:#14252f;--ink:#e6eef2;--mut:#93a6b2;--line:#25394592;--side:#091620;--acc:#3cc1c3;--acc2:#123237;--bad:#ff7a8d;--warn:#e5a94d;--ok:#4cc58a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1a23;--card:#14252f;--ink:#e6eef2;--mut:#93a6b2;--line:#253945;--side:#091620;--acc:#3cc1c3;--acc2:#123237;--bad:#ff7a8d;--warn:#e5a94d;--ok:#4cc58a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 "IBM Plex Sans",system-ui,sans-serif;display:flex;min-height:100vh}
+nav{width:218px;background:var(--side);color:#cfe0e8;padding:18px 12px;flex-shrink:0;display:flex;flex-direction:column;gap:2px}
+nav h1{font-size:19px;color:#fff;margin:0 8px 16px;font-weight:600}
+nav button{all:unset;cursor:pointer;padding:9px 12px;border-radius:8px;color:#cfe0e8}
+nav button:hover{background:#ffffff14}
+nav button.on{background:var(--acc);color:#04201f;font-weight:600}
+nav button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+main{flex:1;min-width:0;padding:22px 26px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h2{margin:0;font-size:22px;font-weight:600}
+.btn{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:8px;font:inherit}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#04201f;font-weight:600}
+.btn.d{color:var(--bad)}
+input,select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);width:100%}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+.stat b{display:block;font-size:26px;font-weight:600}
+.stat span{color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.card h3{margin:0 0 10px;font-size:16px;font-weight:600}
+.bar{height:10px;background:var(--acc2);border-radius:6px;overflow:hidden;margin:4px 0 10px}
+.bar i{display:block;height:100%;background:var(--acc)}
+.bar i.hi{background:var(--bad)}
+.row{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:5px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.mut{color:var(--mut)}
+.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);font-size:14px}
+th{color:var(--mut);font-weight:500}
+tr.r{cursor:pointer}tr.r:hover{background:var(--acc2)}
+.tag{padding:2px 9px;border-radius:20px;font-size:12px;background:var(--acc2);color:var(--acc)}
+.tag.bad{background:#c93c5220;color:var(--bad)}.tag.warn{background:#b9770e22;color:var(--warn)}.tag.ok{background:#1f8a4c20;color:var(--ok)}
+.tools{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}.tools input{max-width:280px}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:20px;width:min(420px,92vw)}
+dialog::backdrop{background:#0008}
+label{display:block;font-size:13px;color:var(--mut);margin:10px 0 3px}
+.acts{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.empty{padding:28px;text-align:center;color:var(--mut)}
+@media(max-width:760px){body{flex-direction:column}nav{width:100%;flex-direction:row;overflow-x:auto;padding:10px}nav h1{display:none}nav button{white-space:nowrap}main{padding:16px}}
+</style>
+</head>
+<body>
+<nav id="nav" aria-label="Modules"></nav>
+<main>
+<header><h2 id="title"></h2><div><button class="btn" id="theme">Dark mode</button> <button class="btn p" id="add" hidden>Add new</button></div></header>
+<div id="view"></div>
+</main>
+<dialog id="dlg"><form method="dialog" id="form" onsubmit="return false"><h3 id="dt" style="margin:0"></h3><div id="df"></div><div class="acts"><button class="btn d" id="del" type="button">Delete</button><button class="btn" id="cancel" type="button">Cancel</button><button class="btn p" id="save" type="button">Save</button></div></form></dialog>
+<script>
+var T=function(){var d=new Date();return d.toISOString().slice(0,10)}();
+var WARDS={"General Ward":20,"ICU":8,"Maternity":10,"Pediatrics":12};
+var M={
+patients:{t:"Patients",f:[["name","Full name"],["age","Age","number"],["gender","Gender",["Male","Female","Other"]],["phone","Phone"],["condition","Condition"]],c:["name","age","gender","phone","condition"]},
+appointments:{t:"Appointments",f:[["patient","Patient"],["doctor","Doctor"],["date","Date","date"],["time","Time","time"],["status","Status",["Scheduled","Done","Cancelled"]]],c:["patient","doctor","date","time","status"]},
+admissions:{t:"Admissions and beds",f:[["patient","Patient"],["ward","Ward",Object.keys(WARDS)],["bed","Bed number"],["date","Admitted on","date"],["status","Status",["Admitted","Discharged"]]],c:["patient","ward","bed","date","status"]},
+billing:{t:"Billing",f:[["patient","Patient"],["item","Service"],["amount","Amount","number"],["date","Date","date"],["status","Payment",["Unpaid","Paid"]]],c:["patient","item","amount","date","status"]},
+pharmacy:{t:"Pharmacy",f:[["medicine","Medicine"],["stock","In stock","number"],["min","Reorder level","number"],["price","Unit price","number"]],c:["medicine","stock","min","price"]},
+lab:{t:"Lab tests",f:[["patient","Patient"],["test","Test"],["date","Date","date"],["status","Status",["Pending","Ready"]],["result","Result"]],c:["patient","test","date","status","result"]},
+staff:{t:"Staff",f:[["name","Name"],["role","Role",["Doctor","Nurse","Pharmacist","Lab technician","Receptionist","Admin"]],["dept","Department"],["phone","Phone"]],c:["name","role","dept","phone"]}
+};
+var seed={
+patients:[{name:"Ayesha Khan",age:34,gender:"Female",phone:"0300-1112233",condition:"Hypertension"},{name:"Bilal Ahmed",age:52,gender:"Male",phone:"0321-4455667",condition:"Diabetes"},{name:"Sana Malik",age:8,gender:"Female",phone:"0333-7788990",condition:"Fever"}],
+appointments:[{patient:"Ayesha Khan",doctor:"Dr. Raza",date:T,time:"10:00",status:"Scheduled"},{patient:"Sana Malik",doctor:"Dr. Fatima",date:T,time:"11:30",status:"Scheduled"}],
+admissions:[{patient:"Bilal Ahmed",ward:"General Ward",bed:"G-4",date:T,status:"Admitted"}],
+billing:[{patient:"Bilal Ahmed",item:"Ward charges",amount:12000,date:T,status:"Unpaid"},{patient:"Ayesha Khan",item:"Consultation",amount:1500,date:T,status:"Paid"}],
+pharmacy:[{medicine:"Paracetamol 500mg",stock:240,min:100,price:3},{medicine:"Insulin",stock:12,min:20,price:850}],
+lab:[{patient:"Bilal Ahmed",test:"HbA1c",date:T,status:"Pending",result:""}],
+staff:[{name:"Dr. Raza",role:"Doctor",dept:"Cardiology",phone:"0301-0000001"},{name:"Dr. Fatima",role:"Doctor",dept:"Pediatrics",phone:"0301-0000002"}]
+};
+var D;try{D=JSON.parse(localStorage.getItem("caredesk")||"null")}catch(e){D=null}
+if(!D)D=JSON.parse(JSON.stringify(seed));
+function persist(){try{localStorage.setItem("caredesk",JSON.stringify(D))}catch(e){}}
+var cur="dashboard",editing=null,q="";
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function tag(v){var c={Paid:"ok",Done:"ok",Ready:"ok",Discharged:"ok",Unpaid:"bad",Cancelled:"bad",Pending:"warn",Scheduled:"",Admitted:"warn"}[v];return c===undefined?esc(v):'<span class="tag '+c+'">'+esc(v)+"</span>"}
+function money(n){return "Rs "+Number(n||0).toLocaleString()}
+function nav(){var h='<h1>CareDesk</h1><button data-k="dashboard" class="'+(cur=="dashboard"?"on":"")+'">Dashboard</button>';
+for(var k in M)h+='<button data-k="'+k+'" class="'+(cur==k?"on":"")+'">'+M[k].t+"</button>";$("nav").innerHTML=h}
+function dash(){
+var open=D.admissions.filter(function(a){return a.status=="Admitted"});
+var cap=0;for(var w in WARDS)cap+=WARDS[w];
+var today=D.appointments.filter(function(a){return a.date==T&&a.status=="Scheduled"});
+var unpaid=D.billing.filter(function(b){return b.status=="Unpaid"}).reduce(function(s,b){return s+Number(b.amount)},0);
+var paid=D.billing.filter(function(b){return b.status=="Paid"}).reduce(function(s,b){return s+Number(b.amount)},0);
+var low=D.pharmacy.filter(function(p){return Number(p.stock)<=Number(p.min)});
+var pend=D.lab.filter(function(l){return l.status=="Pending"});
+var h='<div class="stats">'+[[D.patients.length,"Patients"],[today.length,"Appointments today"],[open.length+" / "+cap,"Beds occupied"],[money(paid),"Collected"],[money(unpaid),"Unpaid bills"],[low.length,"Low stock items"]].map(function(s){return '<div class="stat"><b>'+esc(s[0])+"</b><span>"+s[1]+"</span></div>"}).join("")+"</div><div class='grid'>";
+h+='<div class="card"><h3>Ward occupancy</h3>';
+for(var w2 in WARDS){var n=open.filter(function(a){return a.ward==w2}).length,p=Math.round(n/WARDS[w2]*100);h+='<div class="row"><span>'+w2+'</span><span class="mut">'+n+" of "+WARDS[w2]+'</span></div><div class="bar"><i class="'+(p>=85?"hi":"")+'" style="width:'+p+'%"></i></div>'}
+h+="</div>";
+h+='<div class="card"><h3>Today\'s appointments</h3>'+(today.length?today.sort(function(a,b){return a.time>b.time?1:-1}).map(function(a){return '<div class="row"><span>'+esc(a.time)+" "+esc(a.patient)+'</span><span class="mut">'+esc(a.doctor)+"</span></div>"}).join(""):'<div class="empty">No appointments left today.</div>')+"</div>";
+h+='<div class="card"><h3>Medicines to reorder</h3>'+(low.length?low.map(function(p){return '<div class="row"><span>'+esc(p.medicine)+'</span><span class="tag bad">'+p.stock+" left</span></div>"}).join(""):'<div class="empty">All medicines are stocked.</div>')+"</div>";
+h+='<div class="card"><h3>Lab results waiting</h3>'+(pend.length?pend.map(function(l){return '<div class="row"><span>'+esc(l.patient)+'</span><span class="mut">'+esc(l.test)+"</span></div>"}).join(""):'<div class="empty">No pending lab tests.</div>')+"</div></div>";
+return h}
+function list(k){var m=M[k],rows=D[k];
+var h='<div class="tools"><input id="q" placeholder="Search '+m.t.toLowerCase()+'" value="'+esc(q)+'" aria-label="Search"></div>';
+var vis=rows.map(function(r,i){return[r,i]}).filter(function(x){return !q||JSON.stringify(x[0]).toLowerCase().indexOf(q.toLowerCase())>-1});
+if(!vis.length)return h+'<div class="card empty">Nothing here yet. Select "Add new" to create the first record.</div>';
+h+='<div class="wrap"><table><thead><tr>'+m.c.map(function(c){var f=m.f.filter(function(x){return x[0]==c})[0];return"<th>"+f[1]+"</th>"}).join("")+"</tr></thead><tbody>";
+vis.forEach(function(x){h+='<tr class="r" data-i="'+x[1]+'">'+m.c.map(function(c){var v=x[0][c];return"<td>"+(c=="amount"||c=="price"?money(v):tag(v))+"</td>"}).join("")+"</tr>"});
+return h+"</tbody></table></div>"}
+function render(){nav();$("title").textContent=cur=="dashboard"?"Hospital overview":M[cur].t;$("add").hidden=cur=="dashboard";
+$("view").innerHTML=cur=="dashboard"?dash():list(cur);
+var s=$("q");if(s)s.oninput=function(){q=s.value;var p=s.selectionStart;render();var n=$("q");n.focus();n.setSelectionRange(p,p)}}
+function openForm(i){editing=i;var m=M[cur],r=i==null?{}:D[cur][i];$("dt").textContent=(i==null?"Add ":"Edit ")+m.t.toLowerCase();$("del").style.display=i==null?"none":"";
+$("df").innerHTML=m.f.map(function(f){var v=r[f[0]]!=null?r[f[0]]:(f[2]=="date"?T:"");var id="f_"+f[0];
+if(Array.isArray(f[2]))return"<label for='"+id+"'>"+f[1]+"</label><select id='"+id+"'>"+f[2].map(function(o){return"<option"+(o==v?" selected":"")+">"+o+"</option>"}).join("")+"</select>";
+return"<label for='"+id+"'>"+f[1]+"</label><input id='"+id+"' type='"+(f[2]||"text")+"' value='"+esc(v)+"'>"}).join("");$("dlg").showModal()}
+$("nav").onclick=function(e){var k=e.target.getAttribute("data-k");if(k){cur=k;q="";render()}};
+$("view").onclick=function(e){var tr=e.target.closest("tr.r");if(tr)openForm(+tr.getAttribute("data-i"))};
+$("add").onclick=function(){openForm(null)};
+$("cancel").onclick=function(){$("dlg").close()};
+$("save").onclick=function(){var o={},bad=false;M[cur].f.forEach(function(f){var v=$("f_"+f[0]).value.trim();if(!v&&f[0]!="result"&&f[0]!="phone"&&f[0]!="condition"&&f[0]!="dept"&&f[0]!="bed")bad=true;o[f[0]]=f[2]=="number"?Number(v):v});
+if(bad){alert("Fill in all required fields.");return}
+if(editing==null)D[cur].push(o);else D[cur][editing]=o;persist();$("dlg").close();render()};
+$("del").onclick=function(){if(confirm("Delete this record?")){D[cur].splice(editing,1);persist();$("dlg").close();render()}};
+$("theme").onclick=function(){var r=document.documentElement,dark=r.getAttribute("data-theme")=="dark"||(!r.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme:dark)").matches);r.setAttribute("data-theme",dark?"light":"dark");$("theme").textContent=dark?"Dark mode":"Light mode"};
+render();
+</script>
+</body>
+</html>
